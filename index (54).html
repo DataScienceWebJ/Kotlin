@@ -1,0 +1,127 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kotlin - Яркий и мощный язык программирования</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #6B7280, #A855F7);
+            color: #1F2937;
+            font-family: 'Inter', sans-serif;
+        }
+        .navbar {
+            transition: background-color 0.3s ease;
+        }
+        .navbar.scrolled {
+            background-color: rgba(30, 41, 59, 0.9);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Навигационная панель -->
+    <nav class="navbar fixed top-0 w-full text-white py-4 z-10">
+        <div class="container mx-auto flex justify-between items-center px-4">
+            <h1 class="text-2xl font-bold">Kotlin World</h1>
+            <ul class="flex space-x-6">
+                <li><a href="index.html" class="hover:text-purple-300">Главная</a></li>
+                <li><a href="examples.html" class="hover:text-purple-300">Примеры</a></li>
+                <li><a href="resources.html" class="hover:text-purple-300">Ресурсы</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Главный раздел -->
+    <section id="home" class="flex items-center justify-center min-h-screen text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-5xl font-extrabold mb-4">Добро пожаловать в мир Kotlin!</h1>
+            <p class="text-xl mb-6">Современный, лаконичный и мощный язык программирования для Android, серверов и не только.</p>
+            <a href="#features" class="bg-purple-600 text-white px-6 py-3 rounded-full hover:bg-purple-700 transition">Узнать больше</a>
+        </div>
+    </section>
+
+    <!-- Особенности Kotlin -->
+    <section id="features" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12">Почему выбирают Kotlin?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-6 bg-purple-100 rounded-lg shadow-lg hover:shadow-xl transition">
+                    <h3 class="text-2xl font-semibold mb-4">Лаконичность</h3>
+                    <p>Kotlin позволяет писать меньше кода благодаря современным конструкциям, таким как лямбда-выражения и data-классы.</p>
+                </div>
+                <div class="p-6 bg-purple-100 rounded-lg shadow-lg hover:shadow-xl transition">
+                    <h3 class="text-2xl font-semibold mb-4">Безопасность</h3>
+                    <p>Null safety и строгая типизация помогают избежать ошибок, таких как NullPointerException.</p>
+                </div>
+                <div class="p-6 bg-purple-100 rounded-lg shadow-lg hover:shadow-xl transition">
+                    <h3 class="text-2xl font-semibold mb-4">Универсальность</h3>
+                    <p>Используйте Kotlin для Android, серверных приложений, веб-разработки и даже нативных приложений.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- JavaScript для интерактивности -->
+    <script>
+        // Прокрутка для изменения стиля навигационной панели
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Плавная прокрутка для ссылок навигации
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

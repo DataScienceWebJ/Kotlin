@@ -1,0 +1,101 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ресурсы для изучения Kotlin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #6B7280, #A855F7);
+            color: #1F2937;
+            font-family: 'Inter', sans-serif;
+        }
+        .navbar {
+            transition: background-color 0.3s ease;
+        }
+        .navbar.scrolled {
+            background-color: rgba(30, 41, 59, 0.9);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Навигационная панель -->
+    <nav class="navbar fixed top-0 w-full text-white py-4 z-10">
+        <div class="container mx-auto flex justify-between items-center px-4">
+            <h1 class="text-2xl font-bold">Kotlin World</h1>
+            <ul class="flex space-x-6">
+                <li><a href="index.html" class="hover:text-purple-300">Главная</a></li>
+                <li><a href="examples.html" class="hover:text-purple-300">Примеры</a></li>
+                <li><a href="resources.html" class="hover:text-purple-300">Ресурсы</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Ресурсы -->
+    <section id="resources" class="py-16 bg-white pt-24">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12">Ресурсы для изучения Kotlin</h2>
+            <ul class="list-disc list-inside text-lg space-y-4">
+                <li><a href="https://kotlinlang.org/" class="text-purple-600 hover:underline">Официальный сайт Kotlin</a></li>
+                <li><a href="https://kotlinlang.org/docs/" class="text-purple-600 hover:underline">Документация Kotlin</a></li>
+                <li><a href="https://play.kotlinlang.org/" class="text-purple-600 hover:underline">Kotlin Playground</a></li>
+                <li><a href="https://kotlinlang.org/docs/books.html" class="text-purple-600 hover:underline">Книги по Kotlin</a></li>
+                <li><a href="https://www.jetbrains.com/academy/" class="text-purple-600 hover:underline">JetBrains Academy</a></li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- JavaScript для интерактивности -->
+    <script>
+        // Прокрутка для изменения стиля навигационной панели
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+</html>
